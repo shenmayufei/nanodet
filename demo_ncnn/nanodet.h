@@ -61,7 +61,7 @@ private:
     BoxInfo disPred2Bbox(const float*& dfl_det, int label, float score, int x, int y, int stride);
     static void nms(std::vector<BoxInfo>& result, float nms_threshold);
     int input_size = 320;
-    int num_class = 80;
+    int num_class = 1;
     int reg_max = 7;
 
 };

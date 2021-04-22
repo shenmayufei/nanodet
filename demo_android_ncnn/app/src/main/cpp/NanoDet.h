@@ -42,7 +42,7 @@ private:
 
     ncnn::Net *Net;
     int input_size = 320;
-    int num_class = 80;
+    int num_class = 1;
     int reg_max = 7;
     std::vector<HeadInfo> heads_info{
         // cls_pred|dis_pred|stride

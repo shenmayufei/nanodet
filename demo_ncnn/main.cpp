@@ -225,16 +225,16 @@ void draw_bboxes(const cv::Mat& bgr, const std::vector<BoxInfo>& bboxes, object_
 int image_demo(NanoDet &detector, const char* imagepath)
 {
     // const char* imagepath = "D:/Dataset/coco/val2017/*.jpg";
-
-    std::vector<std::string> filenames;
-    cv::glob(imagepath, filenames, false);
+    cv::String imagepathCv  = imagepath;
+    std::vector<cv::String> filenames;
+    cv::glob(imagepathCv, filenames, false);
 
     for (auto img_name : filenames)
     {
         cv::Mat image = cv::imread(img_name);
         if (image.empty())
         {
-            fprintf(stderr, "cv::imread %s failed\n", img_name);
+            fprintf(stderr, "cv::imread %s failed\n", img_name.c_str());
             return -1;
         }
         object_rect effect_roi;

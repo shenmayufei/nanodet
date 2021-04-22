@@ -13,6 +13,7 @@ endif()
 
 find_package(OpenCV REQUIRED)
 
+set(ncnn_DIR /media/yzh/program/soure/inference/ncnn/mtcnn_ncnn_inference/mtcnn_ncnn/3rdparty/ncnn/build_cpu/install/lib/cmake/ncnn)
 find_package(ncnn REQUIRED)
 if(NOT TARGET ncnn)
     message(WARNING "ncnn NOT FOUND!  Please set ncnn_DIR environment variable")

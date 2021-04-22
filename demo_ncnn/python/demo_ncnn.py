@@ -11,11 +11,14 @@ import argparse
 from pathlib import Path
 from abc import ABCMeta, abstractmethod
 
+import PIL
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image
 from tqdm import tqdm
 from scipy.special import softmax
+
 
 
 # Copy from nanodet/util/visualization.py
@@ -325,7 +328,9 @@ class NanoDetABC(metaclass=ABCMeta):
             box_distance = box_distance * stride
 
             # top K candidate
-            topk_idx = np.argsort(score.max(axis=1))[::-1]
+            # topk_idx = np.argsort(score.max(axis=0))[::-1]
+            score = np.squeeze(score)
+            topk_idx = np.argsort(-score)
             topk_idx = topk_idx[:self.num_candidate]
             center = center[topk_idx]
             score = score[topk_idx]
@@ -340,6 +345,8 @@ class NanoDetABC(metaclass=ABCMeta):
         # nms
         bboxes = np.concatenate(decode_boxes, axis=0)
         confidences = np.concatenate(select_scores, axis=0)
+        confidences = np.expand_dims(confidences,axis=1)
+
         picked_box_probs = []
         picked_labels = []
         for class_index in range(0, confidences.shape[1]):
@@ -446,7 +453,8 @@ class NanoDetTorch(NanoDetABC):
         self.model.train(False)
         with torch.no_grad():
             inference_results = self.model(torch.from_numpy(img_input))
-        scores = [x.permute(0, 2, 3, 1).reshape((-1, 80)).sigmoid().detach().numpy() for x in inference_results[0]]
+        # scores = [x.permute(0, 2, 3, 1).reshape((-1, 80)).sigmoid().detach().numpy() for x in inference_results[0]]
+        scores = [x.permute(0, 2, 3, 1).reshape((-1, 1)).sigmoid().detach().numpy() for x in inference_results[0]]
         raw_boxes = [x.permute(0, 2, 3, 1).reshape((-1, 32)).detach().numpy() for x in inference_results[1]]
         return scores, raw_boxes
 
@@ -469,17 +477,29 @@ class NanoDetNCNN(NanoDetABC):
 
     def infer_image(self, img_input):
         import ncnn
+
+        # bugs , convert the numpy array to ncnn Mat is wrong
         mat_in = ncnn.Mat(img_input.squeeze())
+
         ex = self.net.create_extractor()
         ex.input(self.input_name, mat_in)
 
         score_out_name = ["792", "814", "836"]
         scores = [np.array(ex.extract(x)[1]) for x in score_out_name]
-        scores = [np.reshape(x, (-1, 80)) for x in scores]
+        # scores = [np.reshape(x, (-1, 80)) for x in scores]
+        scores = [np.squeeze(np.reshape(x, (-1, 1))) for x in scores]
 
         boxes_out_name = ["795", "817", "839"]
         raw_boxes = [np.array(ex.extract(x)[1]) for x in boxes_out_name]
         raw_boxes = [np.reshape(x, (-1, 32)) for x in raw_boxes]
+
+        # score_out_name = ["792", "814", "836"]
+        # scores = [ex.extract(x)[1] for x in score_out_name]
+        # scores = [np.reshape(x, (-1, 1)) for x in scores]
+        #
+        # boxes_out_name = ["795", "817", "839"]
+        # raw_boxes = [ex.extract(x)[1] for x in boxes_out_name]
+        # raw_boxes = [np.reshape(x, (-1, 32)) for x in raw_boxes]
 
         return scores, raw_boxes
 

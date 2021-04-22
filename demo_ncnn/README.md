@@ -60,6 +60,7 @@ Set environment variables. Run:
 
 ``` shell script
 export ncnn_DIR=YOUR_NCNN_PATH/build/install/lib/cmake/ncnn
+export ncnn_DIR=/media/yzh/program/soure/inference/ncnn/mtcnn_ncnn_inference/mtcnn_ncnn/3rdparty/ncnn/build_cpu/install/lib/cmake/ncnn
 ```
 
 Build project

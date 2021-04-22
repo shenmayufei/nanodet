@@ -9,3 +9,4 @@ matplotlib
 pyaml
 opencv-python
 tqdm
+onnx-simplifier=0.3.4
